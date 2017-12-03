@@ -3,9 +3,8 @@ class ProductsController < ApplicationController
 
   # GET /products
   def index
-    puts '###############'
-    puts params
     @products = Protocol.all
+
     render json: @products
   end
 
