@@ -3,11 +3,44 @@ class ProductsController < ApplicationController
 
   # GET /products
   def index
-    puts '#############'
-    puts params
     @products = Product.all
 
     render json: @products
+  end
+
+  def search
+    query = "
+      #{params[:receiver]} #{params[:gender_specific]} #{params[:style]} #{params[:theme]}
+    "
+    elements = Product.search(query, fields: [:tags]).map do |e|
+      {
+        "title": e.title,
+        "image_url": e.image_url,
+        "subtitle": e.subtitle,
+        "buttons":[
+          {
+            "type": "web_url",
+            "url": e.url,
+            "title": "View Item"
+          }
+        ]
+      }
+    end
+
+    json = {
+     "messages": [{
+        "attachment":{
+          "type": "template",
+          "payload": {
+            "template_type": "generic",
+            "image_aspect_ratio": "square",
+            "elements": elements
+          }
+        }
+      }]
+    }
+
+    render json: json
   end
 
   # GET /products/1
@@ -48,6 +81,6 @@ class ProductsController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def product_params
-      params.require(:product).permit(:title, :subtitle, :url, :image_url, :tags, :receiver, :genderSpecific, :style, :theme)
+      params.require(:product).permit(:title, :subtitle, :url, :image_url, :tags, :receiver, :gender_specific, :style, :theme)
     end
 end
